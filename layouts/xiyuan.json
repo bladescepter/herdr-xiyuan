@@ -185,6 +185,7 @@
     "light": "xiyuan-light",
     "dark": "xiyuan-dark"
   },
+  "preview": "layouts/xiyuan.svg",
   "terminal_padding": [
     14,
     12

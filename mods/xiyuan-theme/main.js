@@ -3,10 +3,28 @@
 // this mod only rewrites the colors inside themes/xiyuan-light.json and xiyuan-dark.json:
 //   Linux + Omarchy: the whole palette of the current Omarchy theme (watched).
 //   macOS / Windows: the system accent color (checked every minute).
+// A theme file that is missing (an install that copied only layouts/ and mods/) is first
+// written with the Flexoki defaults below, so every platform has both themes.
 // It draws nothing.
 
 import { View, div } from "gpui-kit";
 import { exec, home, appHome, readTextFile, writeTextFile, watchFolder, window, notify } from "herdr";
+
+// Same as the repo's themes/xiyuan-light.json and xiyuan-dark.json.
+const DEFAULTS = {
+  light: {
+    background: "#FFFCF0", foreground: "#100F0F", selection: "#CECDC3", cursor: "#100F0F",
+    ansi: ["#100F0F", "#AF3029", "#66800B", "#AD8301", "#205EA6", "#A02F6F", "#24837B", "#6F6E69",
+      "#B7B5AC", "#D14D41", "#879A39", "#D0A215", "#4385BE", "#CE5D97", "#3AA99F", "#CECDC3"],
+    colors: { accent: "#205EA6", accent_foreground: "#FFFCF0" },
+  },
+  dark: {
+    background: "#100F0F", foreground: "#CECDC3", selection: "#403E3C", cursor: "#CECDC3",
+    ansi: ["#282726", "#D14D41", "#879A39", "#D0A215", "#4385BE", "#CE5D97", "#3AA99F", "#B7B5AC",
+      "#575653", "#AF3029", "#66800B", "#AD8301", "#205EA6", "#A02F6F", "#24837B", "#FFFCF0"],
+    colors: { accent: "#4385BE" },
+  },
+};
 
 const NAMES = ["black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"];
 // AppleAccentColor values; absent means blue (multicolor).
@@ -66,10 +84,22 @@ const themeFile = (mode) => `${appHome()}/themes/xiyuan-${mode}.json`;
 export default class XiyuanTheme extends View {
   init(_props, cx) {
     const platform = window()?.platform; // null under `herdr-app check`
-    if (platform === "linux") this.watchOmarchy(cx);
-    else if (platform === "macos" || platform === "windows") {
-      this.syncAccent(cx, platform);
-      cx.timer.every(60000, (cx) => this.syncAccent(cx, platform));
+    cx.spawn(async (cx) => {
+      try { await this.ensureDefaults(); } catch (e) { this.fail(e); }
+      if (platform === "linux") this.watchOmarchy(cx);
+      else if (platform === "macos" || platform === "windows") {
+        this.syncAccent(cx, platform);
+        cx.timer.every(60000, (cx) => this.syncAccent(cx, platform));
+      }
+    });
+  }
+
+  // Creates only missing files; an existing theme (synced or edited) is left alone.
+  async ensureDefaults() {
+    for (const mode of ["light", "dark"]) {
+      if ((await readTextFile(themeFile(mode))) !== null) continue;
+      try { await writeTextFile(themeFile(mode), JSON.stringify(DEFAULTS[mode], null, 2) + "\n", null); }
+      catch (e) { if ((await readTextFile(themeFile(mode))) === null) throw e; } // lost a race: fine if it exists now
     }
   }
 

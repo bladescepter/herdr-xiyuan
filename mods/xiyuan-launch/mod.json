@@ -1,1 +1,1 @@
-{ "place": "none", "title": "New space", "overlay": { "kind": "dialog", "width": 520, "height": 540 } }
+{ "place": "none", "title": "Folders", "overlay": { "kind": "popup", "width": 300, "height": 420 } }
