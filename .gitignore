@@ -1,0 +1,33 @@
+# 开发用文件，只在本地保留
+/AGENTS.md
+/NOTES.md
+
+# Herdr App 生成的类型声明和编辑器配置（每个 mod 目录里都有）
+gpui-kit.d.ts
+herdr.d.ts
+jsconfig.json
+
+# 布局的运行状态（点击状态、文件快照）
+layouts/.state/
+
+# Herdr 的本机运行文件，防止从 ~/.config/herdr-app 整体复制时误带进来
+/data/
+/frame/
+/icons/
+/telemetry/
+/update-notes-media/
+/*.sock
+/installed.json
+/keys.json
+/seen.json
+/settings.json
+/shared.json
+/update-notes.json
+/view.json
+/window.json
+
+# 系统和编辑器产生的杂项
+.DS_Store
+Thumbs.db
+*.swp
+*~
